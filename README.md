@@ -184,10 +184,14 @@ When you start it, it will create the /container-folder inside the ubuntu and it
 `` docker run –it --mount type=bind,source=/host-folder,target=/container-folder ubuntu bash ``
 
 ### TMPFS mounts
-It just works in Linux. It creates a in memory storage. It will not write on the layer of read-write. 
+It just works in Linux. It creates a in memory storage. It will not write on the layer of read-write. To create it:
 
 `` docker run -it --tmpfs=/app ubuntu bash `` 
 
 or 
 
 `` docker run –it --mount type=tmpfs,destination=/container-folder ubuntu bash ``
+
+
+## Networks
+
