@@ -1,2 +1,139 @@
-# docker-study
-Material gerado no curso de Docker da Alura
+# Docker Studies
+My own studies of Docker
+
+## Goals
+* Isolation 
+* Resource management
+* Version Control
+
+## How do they work
+
+It basically generates a isolated process inside the original OS. The containers can provide isolation in many levels through namespaces.
+
+
+The isolation levels are divided in:
+* PID - Provides isolation of the process running inside the container
+* NET - Provides isolation of web interfaces
+* IPC - Provides isolation of communication between process and shared memory 
+* MNT - Provides isolation of the file system / build point
+* UTS - Provides kernel isolation. Handling the container like It were another host
+
+The Cgroups will provide the resource management in terms of memory and CPU.
+
+## Installing Docker on Linux
+
+Follow the documentation:
+https://docs.docker.com/engine/install/ubuntu/
+
+To not use sudo before every command you can place your user in a group called docker
+
+``
+sudo usermod -aG docker $USER
+``
+
+It will be necessary to restart the system.
+
+For testing the following command can be run:
+
+``
+docker run hello-world
+``
+
+## Docker Hub
+
+Docker hub is a docker images repository. You can find images to be executed there.
+
+The following command will download the image to be run latter.
+
+`` docker pull IMAGE ``
+
+The docker run command will look for the image locally, if it doesn't find, it will try download it from docker hub, then the image hash will be validated and finally the image will be run.
+
+`` docker run IMAGE [COMMAND] `` sleep 1d can be used to keep a container on, since it needs at least a process running to not be closed.
+
+You can see the running images with:
+
+`` docker ps `` 
+
+or both the running images and the already closed
+
+`` docker ps -a``
+
+
+### Other Container commands
+
+| command | result |
+| :---: | :---: |
+| `` docker run -it [IMAGE] bash  `` | Runs directly in the terminal  |
+| `` docker run -d [IMAGE]  `` | Runs in background and prints container ID  |
+| `` docker [-t=0] stop [ID/NAME] `` | Stops a container |
+| `` docker stop $(docker container ls -q) `` | Stops all containers |
+| `` docker pause [ID/NAME] `` | Pauses a container (do not kill the internal processes) |
+| `` docker rm [ID/NAME] `` | Removes a docker, it cannot be restarted |
+| `` docker start [ID/NAME] `` | Restarts a container |
+| `` docker exec -it [ID/NAME] bash `` | Opens the container on the bash  |
+| `` docker port [ID/NAME] `` | Shows the ports mapping  |
+| `` docker images `` | Shows the available images  |
+| `` docker inspect [Image Id] `` | Shows the image details  |
+| `` docker history [Image Id] `` | Shows the image layers  |
+
+
+
+## Mapping ports
+
+The ports inside the container are not automatically configured. For example, when you run 
+`` docker run -d dockersamples/static-site `` , It will run a container with a website running on port 80. However, you are not going to be able to access it from localhost:80.
+
+To access the site will need to map the ports. Instead of the last command, you can run add the flag -P 
+
+``docker run -d -P dockersamples/static-site ``
+
+You can see now that the internal port (port 80) was mapped to another host port and it can be accessed from terminal.
+
+This result can be achieved in a more elegant and well defined way. 
+
+``docker run -d -p 8080:80 dockersamples/static-site ``
+
+The host port 8080 will return the container port 80. 
+
+## Images
+### What are they?
+Images are a group of layers. Those layers are independent from each other and each one has its own ID. The images are read only, however, when it's run, the docker add an additional layer of reading/writing.
+So the basic process is:
+
+ **dockerfile** *-build->* **image** *-run->* **container**
+
+### Making a new Image
+1. Make a new file called: Dockerfile
+2. In this file start with the tag **FROM** to define the base (a base can be find on dockerhub). *Ex: FROM node:14*
+3. Define a default work folder with the tag **WORKDIR**. *Ex: WORKDIR ./app-node*
+4. **ARG** defines a env variable. (Build time)
+5. **ENV** defines a env variable (Run time)
+6. **EXPOSE** says the internal port of the docker 
+7. To copy the host content to this image, use the tag **COPY**. *Ex: COPY . /app-node*
+8. To exec a command when the container is being created use the tag **RUN**. *Ex: RUN npm install*
+9. **ENTRYPOINT** will run a command after the container is already created. *Ex: ENTRYPOINT npm start*
+10. Save the file
+11. Use the command ``docker build -t nome/app-nome:1.0 .`` to build a image with nome/app-nome name version 1 in the actual directory.
+
+References: https://docs.docker.com/engine/reference/builder/
+
+
+### Exporting a image to DockerHub
+
+1. Create a account on DockerHub
+2. Login in using ``docker login -u [USER]``
+3. Use the command ``docker push [USER/image:version]``
+
+Note that the user should be the same as the image. 
+
+
+### Images Commands
+
+
+| command | result |
+| :---: | :---: |
+| `` docker images `` | Shows the available images  |
+| `` docker inspect [Image Id] `` | Shows the image details  |
+| `` docker history [Image Id] `` | Shows the image layers  |
+| `` docker tag [Image] [New Image]`` | Creates a  copy of the image with a new repository name  |
