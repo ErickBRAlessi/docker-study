@@ -59,17 +59,25 @@ or both the running images and the already closed
 
 `` docker ps -a``
 
+or it brings also the virtual container sizes
+
+`` docker ps -s``
+
+
+
 
 ### Other Container commands
 
 | command | result |
 | :---: | :---: |
+| `` docker [TOPIC] COMMAND  `` | It brings all topic related command. Ex: image, volume  |
 | `` docker run -it [IMAGE] bash  `` | Runs directly in the terminal  |
 | `` docker run -d [IMAGE]  `` | Runs in background and prints container ID  |
 | `` docker [-t=0] stop [ID/NAME] `` | Stops a container |
 | `` docker stop $(docker container ls -q) `` | Stops all containers |
 | `` docker pause [ID/NAME] `` | Pauses a container (do not kill the internal processes) |
 | `` docker rm [ID/NAME] `` | Removes a docker, it cannot be restarted |
+| `` docker rm $(docker container ls -aq) `` | Removes all containers, including the stopped ones |
 | `` docker start [ID/NAME] `` | Restarts a container |
 | `` docker exec -it [ID/NAME] bash `` | Opens the container on the bash  |
 | `` docker port [ID/NAME] `` | Shows the ports mapping  |
@@ -137,3 +145,49 @@ Note that the user should be the same as the image.
 | `` docker inspect [Image Id] `` | Shows the image details  |
 | `` docker history [Image Id] `` | Shows the image layers  |
 | `` docker tag [Image] [New Image]`` | Creates a  copy of the image with a new repository name  |
+| `` docker rmi $(docker image ls -aq) --force `` | Removes all images |
+
+
+## Handling Data
+
+Docker provides three ways to persist data: 
+1. Volumes: persist data on a persistent layer.
+2. Bind mounts: persists data on a persistent layer based on host folder structure.
+3. TMPFS mounts: creates a temporary storage
+
+### Volumes
+
+This is most recommended way to persist data. Because it creates a area inside the host, but the container is the manager. You can run your container linking this volume to the container-folder, if the volume does`t exist, it will be created.
+
+`` docker run –it --mount source=[VolumeName],target=/container-folder ubuntu bash ``
+
+ or (this way you need to have you volume created previously)
+
+`` docker run -it -v [VolumeName]:/container-folder ubuntu bash ``
+
+The volumes files inside the host are going to be in /var/lib/docker/volumes/[VolumeName]/_data
+
+| command | result |
+| :---: | :---: |
+| `` docker volume ls `` | Shows the available volumes  |
+| `` docker volume create [Volume Name] `` | Create a volume with the given name  |
+| `` docker volume rm [Volume Name] `` | Removes one or more volumes with the given name  |
+
+
+### Bind Mount
+It allows to use a local folder to link with a folder inside the container. The following command will run a ubuntu container linking the ./host-folder with the ./container-folder.
+
+`` docker run -it -v /host-folder:/container-folder ubuntu bash ``
+
+When you start it, it will create the /container-folder inside the ubuntu and it can be accessed from the host normally. Although, the recommended way to do this is using the *--mount*.
+
+`` docker run –it --mount type=bind,source=/host-folder,target=/container-folder ubuntu bash ``
+
+### TMPFS mounts
+It just works in Linux. It creates a in memory storage. It will not write on the layer of read-write. 
+
+`` docker run -it --tmpfs=/app ubuntu bash `` 
+
+or 
+
+`` docker run –it --mount type=tmpfs,destination=/container-folder ubuntu bash ``
