@@ -194,4 +194,54 @@ or
 
 
 ## Networks
+Every container will run with a configured network. If it is not set previously, the docker will automatically configure it on a default bridge network for you. You can check the container network id and its ip with the inspect command or 
+`` docker network ls `` to list all the available networks. You should be able to communicate all these container through tcp/ip. 
+
+### Bridge
+The bridge network is used to communicate containers running on the same host. You may create your own user-defined bridge network and be able to communicate the containers through a automatic DNS resolution, it means, through the container's name. To create the network use the command:
+
+`` docker network create --driver bridge [Network Name] ``
+
+then when you are about to create the container, you can set this network and the selected container name with:
+
+`` docker run -d --name [Container Name] --network [Network Name] ubuntu bash ``
+
+Now you should be able to communicate between the containers using, for example: ping [Image Name].
+
+
+### None and Host
+
+If you create a network using the driver none, it means that the container will be isolated in terms of network. 
+
+`` docker run -d --network none ubuntu bash ``
+
+If you create a network using a driver using host, it will use the host network. It may be useful if you don't want to use the docker port mapping. 
+
+`` docker run -d --network host ubuntu bash ``
+
+
+## Docker Compose
+
+The main goal of the docker compose is to solve the "how to run multiple containers at same time in a coordinated way", so it wouldn't be necessary to execute each run command individually. It allows to create an .yml file used to create a "recipe" to run many containers at the same time.
+
+If it is not installed, you should follow the documentation: 
+https://docs.docker.com/compose/install/
+
+
+To create the docker-compose.yml file.
+1. First define the **version**. Ex: version: "3.9"
+2. Create the **services** that it will run. Ex: services: mongodb: image: mongo:4.4.6 container_name: meu-mongo networks: - compose-bridge ports:3000:8080
+3. Create the **networks** that doesn't exists. Ex: networks: compose-bridge: driver: bridge
+4. Write down how a container **depends_on** another one. So the docker-compose will wait until the dependencies are created to run the depended container. Ex: depends_on: - mongodb
+Now you can save the file and run the command in the folder where it's saved.
+
+`` docker-compose up -d ``
+
+other docker-compose commands:
+
+`` docker-compose ps ``
+`` docker-compose down ``
+
+for more info about compose file:
+https://docs.docker.com/compose/compose-file/
 

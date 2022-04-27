@@ -1,0 +1,25 @@
+version: "3.3"
+services:
+  mongodb: 
+    image: mongo:4.4.6
+    container_name: meu-mongo
+    networks:
+      - compose-bridge
+    volumes:
+      - container-folder:/mongodb
+  alurabooks:
+    image: aluradocker/alura-books:1.0
+    container_name: alurabooks
+    networks:
+      - compose-bridge
+    ports:
+      - 3000:3000
+    depends_on:
+      - mongodb
+    volumes:
+      - container-folder:/alurabooks
+networks: 
+  compose-bridge:
+    driver: bridge
+volumes:
+  container-folder:
